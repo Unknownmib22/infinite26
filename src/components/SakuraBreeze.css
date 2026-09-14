@@ -1,0 +1,84 @@
+.sakura-breeze {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.sakura-petal {
+  position: absolute;
+  left: -40px;
+  top: var(--top);
+
+  width: var(--size);
+  height: calc(var(--size) * 0.65);
+
+  background: rgba(180, 72, 82, 0.5);
+
+  border-radius: 100% 0 100% 0;
+
+  animation:
+    sakuraFlow var(--duration) linear var(--delay) infinite,
+    sakuraFlutter 2.8s ease-in-out var(--delay) infinite;
+}
+
+@keyframes sakuraFlow {
+  0% {
+    left: -40px;
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 0.65;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+
+  90% {
+    opacity: 0.4;
+  }
+
+  100% {
+    left: 105%;
+    opacity: 0;
+  }
+}
+
+@keyframes sakuraFlutter {
+  0% {
+    margin-top: 0;
+    transform: rotate(var(--rotation));
+  }
+
+  25% {
+    margin-top: -18px;
+    transform: rotate(calc(var(--rotation) + 35deg));
+  }
+
+  50% {
+    margin-top: 8px;
+    transform: rotate(calc(var(--rotation) + 90deg));
+  }
+
+  75% {
+    margin-top: -12px;
+    transform: rotate(calc(var(--rotation) + 145deg));
+  }
+
+  100% {
+    margin-top: 0;
+    transform: rotate(calc(var(--rotation) + 180deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sakura-petal {
+    animation: none;
+    opacity: 0.25;
+  }
+}

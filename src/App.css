@@ -1,0 +1,6 @@
+/* INFINITE'26 uses index.css as its main stylesheet.
+   This file intentionally stays minimal. */
+
+#root {
+  min-height: 100vh;
+}
