@@ -104,24 +104,6 @@ const events = [
     ]
   },
 
-  {
-    id: "mens-physique",
-    dynasty: "Kaze",
-    japanese: "風",
-    category: "Fashion",
-    name: "Men's Physique",
-    fee: 200,
-    pricing: "per_head",
-    type: "individual",
-    description: "Discipline, preparation and presentation take centre stage.",
-    rules: [
-      "Any number of participants from each college are permitted.",
-      "Board shorts only.",
-      "Briefs are strictly not allowed.",
-      "Participants must use Dream Tan Oil.",
-      "Participants must display the mandatory quarter poses."
-    ]
-  },
 
   // =========================
   // OTO
@@ -166,24 +148,6 @@ const events = [
     ]
   },
 
-  {
-    id: "instrumental-solo",
-    dynasty: "Oto",
-    japanese: "音",
-    category: "Music",
-    name: "Instrumental Solo",
-    fee: 150,
-    pricing: "per_head",
-    type: "individual",
-    description: "Let the instrument speak when words fall silent.",
-    rules: [
-      "Multiple entries per college are permitted.",
-      "Time limit: 3–4 minutes.",
-      "Performance must be entirely live.",
-      "Participants must bring their own instruments.",
-      "Backing tracks are not permitted."
-    ]
-  },
 
   // =========================
   // KOKORO
@@ -262,25 +226,6 @@ const events = [
       "Entries should demonstrate original thought and imagination.",
       "Clear, engaging and grammatically sound language is encouraged.",
       "Word limit: 800–1000 words."
-    ]
-  },
-
-  {
-    id: "song-writing",
-    dynasty: "Kokoro",
-    japanese: "心",
-    category: "Literary",
-    name: "Song Writing",
-    fee: 75,
-    pricing: "per_head",
-    type: "individual",
-    description: "Turn emotion into words and words into melody.",
-    rules: [
-      "Open theme.",
-      "Each participant may submit one original composition.",
-      "Entries should reflect originality and imagination.",
-      "The submission must contain original lyrics.",
-      "Word limit: 300–500 words."
     ]
   },
 
@@ -436,25 +381,6 @@ const events = [
       "Short films must be screened during the event.",
       "The title is compulsory.",
       "Submissions must be in MP4 format."
-    ]
-  },
-
-  {
-    id: "dub-dazzle",
-    dynasty: "Yume",
-    japanese: "夢",
-    category: "Media",
-    name: "Dub & Dazzle",
-    fee: 75,
-    pricing: "per_head",
-    type: "individual",
-    description: "Reimagine a scene. Give it your own voice.",
-    rules: [
-      "Multiple entries per college are permitted.",
-      "Duration: maximum 1 minute.",
-      "Participants must recreate a scene from a recognised film or video.",
-      "The submission must be in MP4 format.",
-      "Vulgarity, offensive content and nudity are strictly prohibited."
     ]
   },
 

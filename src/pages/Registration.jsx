@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -17,27 +17,159 @@ function Registration() {
     [eventId]
   );
 
-  const [teamSize, setTeamSize] = useState(
-    event?.minMembers || 1
+  /*
+    ============================================================
+    INFINITE'26 REGISTRATION MEMORY CACHE
+    ============================================================
+
+    This uses sessionStorage so that participant details are
+    remembered during the current browser session.
+
+    It remembers:
+    - Name
+    - Phone
+    - Email
+    - College
+    - Team size
+    - Team member details
+
+    It does NOT permanently store the information.
+  */
+
+  const CACHE_KEY = "infinite26_registration_cache";
+
+  const getRegistrationCache = () => {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+
+      if (!cached) {
+        return {
+          organizer: {
+            name: "",
+            phone: "",
+            email: "",
+            college: "",
+          },
+          eventDrafts: {},
+        };
+      }
+
+      const parsed = JSON.parse(cached);
+
+      return {
+        organizer: {
+          name: parsed?.organizer?.name || "",
+          phone: parsed?.organizer?.phone || "",
+          email: parsed?.organizer?.email || "",
+          college: parsed?.organizer?.college || "",
+        },
+        eventDrafts: parsed?.eventDrafts || {},
+      };
+    } catch {
+      return {
+        organizer: {
+          name: "",
+          phone: "",
+          email: "",
+          college: "",
+        },
+        eventDrafts: {},
+      };
+    }
+  };
+
+  const initialCache = getRegistrationCache();
+
+  /*
+    ============================================================
+    ORGANIZER / PARTICIPANT DETAILS
+    ============================================================
+  */
+
+  const [organizer, setOrganizer] = useState(
+    initialCache.organizer
   );
 
-  const [members, setMembers] = useState([]);
+  /*
+    ============================================================
+    EVENT-SPECIFIC DRAFT
+    ============================================================
 
-  const [organizer, setOrganizer] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    college: "",
-  });
+    Team information is stored separately for each event.
 
-  // Two declarations must be independent
+    This prevents a team from one event accidentally appearing
+    when the user registers for another event.
+  */
+
+  const cachedEventDraft =
+    eventId && initialCache.eventDrafts
+      ? initialCache.eventDrafts[eventId]
+      : null;
+
+  const [teamSize, setTeamSize] = useState(
+    cachedEventDraft?.teamSize ||
+      event?.minMembers ||
+      1
+  );
+
+  const [members, setMembers] = useState(
+    cachedEventDraft?.members || []
+  );
+
+  /*
+    ============================================================
+    DECLARATIONS
+    ============================================================
+  */
+
   const [declarationAccuracy, setDeclarationAccuracy] =
     useState(false);
 
   const [declarationGuidelines, setDeclarationGuidelines] =
     useState(false);
 
-  // If no valid event was selected
+  /*
+    ============================================================
+    SAVE REGISTRATION MEMORY
+    ============================================================
+  */
+
+  useEffect(() => {
+    if (!eventId) return;
+
+    try {
+      const currentCache = getRegistrationCache();
+
+      currentCache.organizer = organizer;
+
+      currentCache.eventDrafts = {
+        ...currentCache.eventDrafts,
+        [eventId]: {
+          teamSize,
+          members,
+        },
+      };
+
+      sessionStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify(currentCache)
+      );
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [
+    organizer,
+    members,
+    teamSize,
+    eventId,
+  ]);
+
+  /*
+    ============================================================
+    INVALID EVENT
+    ============================================================
+  */
+
   if (!event) {
     return (
       <div className="site">
@@ -45,7 +177,9 @@ function Registration() {
 
         <main className="registration-page">
           <section className="registration-error">
-            <p className="section-kicker">REGISTRATION</p>
+            <p className="section-kicker">
+              REGISTRATION
+            </p>
 
             <h1>Select an Event First</h1>
 
@@ -68,6 +202,12 @@ function Registration() {
     );
   }
 
+  /*
+    ============================================================
+    EVENT CALCULATIONS
+    ============================================================
+  */
+
   const isTeam = event.type === "team";
   const isPerHead = event.pricing === "per_head";
 
@@ -79,8 +219,17 @@ function Registration() {
     ? event.fee * requiredMembers
     : event.fee;
 
-  // Update individual team member
-  const updateMember = (index, field, value) => {
+  /*
+    ============================================================
+    UPDATE INDIVIDUAL TEAM MEMBER
+    ============================================================
+  */
+
+  const updateMember = (
+    index,
+    field,
+    value
+  ) => {
     setMembers((current) => {
       const updated = [...current];
 
@@ -102,7 +251,12 @@ function Registration() {
     });
   };
 
-  // Change number of team members
+  /*
+    ============================================================
+    CHANGE TEAM SIZE
+    ============================================================
+  */
+
   const handleTeamSizeChange = (size) => {
     setTeamSize(size);
 
@@ -122,11 +276,19 @@ function Registration() {
     });
   };
 
-  // Continue from registration to payment
+  /*
+    ============================================================
+    CONTINUE TO PAYMENT
+    ============================================================
+  */
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Both declarations must be accepted
+    /*
+      Both declarations must be accepted.
+    */
+
     if (
       !declarationAccuracy ||
       !declarationGuidelines
@@ -134,21 +296,17 @@ function Registration() {
       alert(
         "Please accept both declarations before continuing."
       );
+
       return;
     }
 
     /*
-      Store the registration temporarily in sessionStorage.
+      Store the complete registration temporarily.
 
-      This allows Payment.jsx to receive:
-      - Event
-      - Participant details
-      - Team members
-      - Team size
-      - Total amount
+      This is separate from the small memory cache above.
 
-      Later, this data will be sent to:
-      Google Sheets + Google Drive.
+      Payment.jsx receives this data through:
+      "infinite26_registration"
     */
 
     const registrationData = {
@@ -178,7 +336,8 @@ function Registration() {
 
       totalAmount,
 
-      createdAt: new Date().toISOString(),
+      createdAt:
+        new Date().toISOString(),
     };
 
     sessionStorage.setItem(
@@ -186,9 +345,23 @@ function Registration() {
       JSON.stringify(registrationData)
     );
 
+    /*
+      IMPORTANT:
+      Do NOT clear the registration memory cache here.
+
+      The user may come back from the payment page and
+      should still have their details available.
+    */
+
     // Go to payment page
     navigate("/payment");
   };
+
+  /*
+    ============================================================
+    UI
+    ============================================================
+  */
 
   return (
     <div className="site">
@@ -241,7 +414,9 @@ function Registration() {
             </div>
 
             <div className="registration-price">
-              <span>REGISTRATION FEE</span>
+              <span>
+                REGISTRATION FEE
+              </span>
 
               <strong>
                 ₹{event.fee}
@@ -274,7 +449,9 @@ function Registration() {
                   REGISTRATION DETAILS
                 </p>
 
-                <h2>Participant Details</h2>
+                <h2>
+                  Participant Details
+                </h2>
               </div>
 
             </div>
@@ -378,8 +555,11 @@ function Registration() {
                       college,
                     });
 
-                    // Automatically update
-                    // existing team colleges
+                    /*
+                      Automatically update
+                      existing team colleges.
+                    */
+
                     setMembers((current) =>
                       current.map((member) => ({
                         ...member,
@@ -412,7 +592,9 @@ function Registration() {
                     TEAM
                   </p>
 
-                  <h2>Team Members</h2>
+                  <h2>
+                    Team Members
+                  </h2>
                 </div>
 
               </div>
@@ -427,7 +609,8 @@ function Registration() {
 
                   <p className="form-help">
                     This event allows{" "}
-                    {event.minMembers}–{event.maxMembers}{" "}
+                    {event.minMembers}–
+                    {event.maxMembers}{" "}
                     members.
                   </p>
 
@@ -442,25 +625,27 @@ function Registration() {
                   }
                 >
 
-                  {Array.from(
-                    {
-                      length:
-                        event.maxMembers -
+                  {Array.from({
+                    length:
+                      event.maxMembers -
+                      event.minMembers +
+                      1,
+                  }).map(
+                    (_, index) => {
+                      const size =
                         event.minMembers +
-                        1,
-                    },
-                    (_, index) =>
-                      event.minMembers + index
-                  ).map((size) => (
+                        index;
 
-                    <option
-                      key={size}
-                      value={size}
-                    >
-                      {size} Members
-                    </option>
-
-                  ))}
+                      return (
+                        <option
+                          key={size}
+                          value={size}
+                        >
+                          {size} Members
+                        </option>
+                      );
+                    }
+                  )}
 
                 </select>
 
@@ -492,7 +677,8 @@ function Registration() {
                         <div>
 
                           <span>
-                            MEMBER {index + 1}
+                            MEMBER{" "}
+                            {index + 1}
                           </span>
 
                           <h3>
@@ -520,7 +706,9 @@ function Registration() {
                           <input
                             type="text"
                             required
-                            value={member.name}
+                            value={
+                              member.name
+                            }
                             onChange={(e) =>
                               updateMember(
                                 index,
@@ -544,7 +732,9 @@ function Registration() {
                           <input
                             type="tel"
                             required
-                            value={member.phone}
+                            value={
+                              member.phone
+                            }
                             onChange={(e) =>
                               updateMember(
                                 index,
@@ -569,7 +759,9 @@ function Registration() {
                           <input
                             type="email"
                             required
-                            value={member.email}
+                            value={
+                              member.email
+                            }
                             onChange={(e) =>
                               updateMember(
                                 index,
@@ -635,7 +827,9 @@ function Registration() {
                   PAYMENT
                 </p>
 
-                <h2>Registration Summary</h2>
+                <h2>
+                  Registration Summary
+                </h2>
               </div>
 
             </div>
@@ -678,7 +872,8 @@ function Registration() {
 
                   {isPerHead
                     ? " / head"
-                    : event.pricing === "per_team"
+                    : event.pricing ===
+                      "per_team"
                     ? " / team"
                     : " / entry"}
 
@@ -701,8 +896,9 @@ function Registration() {
             </div>
 
             <p className="payment-note">
-              Payment will be completed on the next
-              step. Keep your transaction details ready.
+              Payment will be completed on the
+              next step. Keep your transaction
+              details ready.
             </p>
 
           </section>
@@ -740,7 +936,9 @@ function Registration() {
                 <input
                   type="checkbox"
                   required
-                  checked={declarationAccuracy}
+                  checked={
+                    declarationAccuracy
+                  }
                   onChange={(e) =>
                     setDeclarationAccuracy(
                       e.target.checked
@@ -750,12 +948,13 @@ function Registration() {
 
                 <span>
                   I confirm that the information
-                  provided in this registration form
-                  is accurate and complete. I agree to
-                  abide by the official rules and
-                  regulations of the event and accept
-                  the decisions of the Organizing
-                  Committee and Judges as final.
+                  provided in this registration
+                  form is accurate and complete.
+                  I agree to abide by the official
+                  rules and regulations of the event
+                  and accept the decisions of the
+                  Organizing Committee and Judges
+                  as final.
                 </span>
 
               </label>
@@ -767,7 +966,9 @@ function Registration() {
                 <input
                   type="checkbox"
                   required
-                  checked={declarationGuidelines}
+                  checked={
+                    declarationGuidelines
+                  }
                   onChange={(e) =>
                     setDeclarationGuidelines(
                       e.target.checked
@@ -778,7 +979,8 @@ function Registration() {
                 <span>
                   I confirm that I have read and
                   understood the event guidelines
-                  before submitting this registration.
+                  before submitting this
+                  registration.
                 </span>
 
               </label>

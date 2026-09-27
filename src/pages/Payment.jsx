@@ -351,9 +351,16 @@ function Payment() {
 
       // Registration data no longer needed
 
-      sessionStorage.removeItem(
-        "infinite26_registration"
-      );
+      // Registration data no longer needed
+
+    sessionStorage.removeItem(
+     "infinite26_registration"
+     );
+
+
+     sessionStorage.removeItem(
+     "infinite26_registration_cache"
+     );
 
     } catch (err) {
 
