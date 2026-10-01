@@ -15,7 +15,7 @@ const events = [
     rules: [
       "Group entries: maximum 2 entries per college.",
       "Solo/Duo: multiple entries are permitted.",
-      "Time limit: 3–4 minutes.",
+      "Time limit: 3 minutes.",
       "Any language or genre of music is permitted.",
       "Audio must be submitted in MP3 format.",
       "Appropriate traditional attire is mandatory."
@@ -34,7 +34,7 @@ const events = [
     description: "Own the stage with rhythm, movement and individual expression.",
     rules: [
       "Multiple entries are permitted per college.",
-      "Time limit: 3–4 minutes.",
+      "Time limit: 3 minutes.",
       "Western freestyle and freestyle dance forms are permitted.",
       "Any language or genre of music is permitted.",
       "Props are permitted subject to stage safety."
@@ -76,7 +76,7 @@ const events = [
     description: "Recreate a dance sequence and bring it to life in your own way.",
     rules: [
       "Team size: 2–20 participants.",
-      "Time limit: maximum 5 minutes.",
+      "Time limit: maximum 4 minutes.",
       "Multiple songs may be combined.",
       "Performance must closely replicate the chosen reference.",
       "Vulgarity, offensive gestures and inappropriate content are prohibited."
@@ -99,7 +99,7 @@ const events = [
       "Only 1 team from each college is allowed.",
       "Team size: 5–20 participants.",
       "All members must be from the same college.",
-      "Time limit: 5–6 minutes.",
+      "Time limit: 5 minutes.",
       "Freestyle or Western styles are allowed."
     ]
   },
@@ -142,7 +142,7 @@ const events = [
     rules: [
       "Exactly 2 participants per team.",
       "Any gender combination is permitted.",
-      "Time limit: 4–5 minutes.",
+      "Time limit: 4 minutes.",
       "Karaoke tracks are permitted.",
       "Audio must be submitted in MP3 format."
     ]
@@ -377,7 +377,7 @@ const events = [
     description: "Frames become stories. Stories become memories.",
     rules: [
       "Multiple entries per college are allowed.",
-      "Duration: 2–3 minutes.",
+      "Duration: 3 minutes.",
       "Short films must be screened during the event.",
       "The title is compulsory.",
       "Submissions must be in MP4 format."
